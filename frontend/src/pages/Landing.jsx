@@ -8,7 +8,7 @@ import LandingNavbar from "../components/LandingNavbar";
 import Spotlight from "../components/Spotlight";
 
 const ROBOT_SCENE_URL =
-  "https://prod.spline.design/PyzDhpQ9E5f1E3MT/scene.splinecode";
+ "https://prod.spline.design/PyzDhpQ9E5f1E3MT/scene.splinecode";
 
 export default function Landing() {
   const navigate = useNavigate();

@@ -116,7 +116,7 @@ export default function Profile({ profile }) {
       alert(err.response?.data?.message || "Update failed");
     }
   };
-
+//praise this resume
 
   const handleParseAndPrefill = async(e) => {
     const file = e.target.file[0];
