@@ -7,9 +7,11 @@ export default function Profile({ profile }) {
   if (!profile) return null;
 
   const [isEditing, setIsEditing] = useState(false);
+  const[isParsing, setlsParsing] = useState(false);
 
   // Refs for file uploads
   const resumeInputRef = useRef(null);
+  const parseResumeInputRef = useRef(null);
   const avatarInputRef = useRef(null);
   const bannerInputRef = useRef(null);
 
@@ -114,6 +116,59 @@ export default function Profile({ profile }) {
       alert(err.response?.data?.message || "Update failed");
     }
   };
+
+
+  const handleParseAndPrefill = async(e) => {
+    const file = e.target.file[0];
+    if(!file) return;
+
+    e.target.value = "";
+    setIsParsing(true);
+    const data = new FormData();
+    data.append("resume", file);
+    try{
+      const res = await api.post("/api/auth/parse",data);
+      const parsed = res.data;
+
+
+
+      setFormData(prev => ({
+
+        fullName: prev.fullName  || parsed.fullName ||"",
+        username: prev.username,
+        jobTitle: prev.jobTitle  || parsed.jobTitle ||"",
+        bio:      prev.bio       || parsed.intro    ||"",
+        dob:      prev.dob,
+        mobileNo: prev.mobileNo  ||parsed.mobileNo  ||"",
+        city:     prev.city      ||parsed.city      ||"",
+        state:    prev.state     ||parsed.state     ||"",
+        country:  prev.country   ||parsed.country   ||"",
+        links:{
+          linkedin: prev.link.linkedin  ||parsed.linkedin ||"",
+          github:   prev.link.github    ||parsed.github   ||"",
+          twitter:  prev.link.twitter   ||"",
+          leetcode: prev.link.leetcode  ||"",
+          hackerrank:prev.link.hackerrank||"",
+        },
+
+        skills:       prev.skills?.length          ?prev.skills     :(parsed.skills   || []),
+        education:       prev.education?.length          ?prev.education     :(parsed.education   || []),
+        workHistory:       prev.workHistory?.length          ?prev.workHistory     :(parsed.workhistioy   || []),
+        certifications:       prev.certifications?.length          ?prev.certifications     :(parsed.certifications   || []),
+        achievemints:       prev.achievemints?.length          ?prev.achievemints     :(parsed.achievemints   || []),
+
+        bannerUrl: prev.bannerUrl,
+        avatarUrl: prev.avatarUrl,
+      }))
+
+
+      setIsEditing(true);
+    } catch(err){
+      alert("Resume parsing failed:" +(err.response?.data?.message || err.message));
+    }finally{
+      setIsPaesing(false);
+    }
+  }
 
   return (
     <motion.div
@@ -290,6 +345,38 @@ export default function Profile({ profile }) {
               </a>
               <button onClick={() => resumeInputRef.current.click()} className="py-2.5 rounded-lg bg-white/5 text-xs font-bold border border-white/10 text-white hover:bg-white/10 transition-all">Update</button>
             </div>
+            {}
+              <button
+              onClick={() => parseResumeInputRef.current.click()}
+              disabled={isParsing}
+              className="w-full py-2.5 mb-3 rounded-lg bg-violet-600/20 border border-violet-500/30 text-violet-300 text-xs fornt-bold hover:bg-violet-600/30 hover:text-violet-200 transition-all flex item-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed "
+                >
+
+                  {isParsing ? (
+                  <>
+                    <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentolour" strokeWidth="4"/>
+                    <path className="opacity-75" fill="currentColour" d="M4 12a8 8 0 018-8v8z"/>
+                    </svg>
+                    parsing...
+                    </>
+                  ) : (
+                    <>
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-23v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2q2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                      </svg>
+                      parse form Resume
+                      </>
+                  )}
+                  </button>
+                  <input
+                  type="file"
+                  ref={parseresumeInputref}
+                  onChange={handleParseAndPrefill}
+                  className="hidden"
+                  accepet=".pdf"
+                  />
+            
             <a
               href={profile.resumeUrl}
               download
